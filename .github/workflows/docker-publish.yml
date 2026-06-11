@@ -53,11 +53,14 @@ jobs:
 
       - name: Resolve version
         id: version
+        # On tag pushes pass a clean semver (strip the leading "v") to go-cross.
+        # Otherwise leave it empty so go-cross derives the version from .git in
+        # the build context (a non-semver value like a short SHA is rejected).
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
-            echo "value=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+            echo "value=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
           else
-            echo "value=${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+            echo "value=" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Set up Docker Buildx
