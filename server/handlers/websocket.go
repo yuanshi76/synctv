@@ -140,7 +140,6 @@ func writeMessage(c *op.Client, v op.Message) error {
 func leaveWebRTC(c *op.Client) {
 	if c.RTCJoined() {
 		c.SetRTCJoined(false)
-		c.SetRTCJoined(false)
 		_ = c.Broadcast(&pb.Message{
 			Type: pb.MessageType_WEBRTC_LEAVE,
 			Sender: &pb.Sender{

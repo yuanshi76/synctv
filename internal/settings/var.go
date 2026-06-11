@@ -1,6 +1,7 @@
 package settings
 
 import (
+	"encoding/json"
 	"errors"
 	"net/url"
 	"strings"
@@ -121,4 +122,24 @@ var P2PZone = NewStringSetting(
 	"p2p_zone",
 	"hk",
 	model.SettingGroupServer,
+)
+
+// WebRTCICEServers is a JSON array of RTCIceServer objects consumed by the
+// browser, e.g.
+// [{"urls":"stun:stun.l.google.com:19302"},{"urls":"turn:turn.example.com:3478","username":"u","credential":"p"}].
+// Empty means the frontend uses its built-in default STUN server.
+var WebRTCICEServers = NewStringSetting(
+	"webrtc_ice_servers",
+	"",
+	model.SettingGroupServer,
+	WithValidatorString(func(s string) error {
+		if s == "" {
+			return nil
+		}
+		var servers []json.RawMessage
+		if err := json.Unmarshal([]byte(s), &servers); err != nil {
+			return errors.New("webrtc_ice_servers must be a valid JSON array")
+		}
+		return nil
+	}),
 )

@@ -21,6 +21,7 @@ type publicSettings struct {
 	Oauth2DisableSignup   bool     `json:"oauth2DisableSignup"`
 	GuestEnable           bool     `json:"guestEnable"`
 	P2PZone               string   `json:"p2pZone"`
+	WebRTCICEServers      string   `json:"webrtcICEServers,omitempty"`
 }
 
 func Settings(ctx *gin.Context) {
@@ -46,8 +47,9 @@ func Settings(ctx *gin.Context) {
 
 			Oauth2DisableSignup: settings.DisableUserSignup.Get() || len(oauth2SignupEnabled) == 0,
 
-			GuestEnable: settings.EnableGuest.Get(),
-			P2PZone:     settings.P2PZone.Get(),
+			GuestEnable:      settings.EnableGuest.Get(),
+			P2PZone:          settings.P2PZone.Get(),
+			WebRTCICEServers: settings.WebRTCICEServers.Get(),
 		},
 	))
 }
