@@ -88,6 +88,13 @@ You can also use docker to install and run SyncTV.
 docker run -d --name synctv -v /opt/synctv:/root/.synctv -p 8080:8080 synctvorg/synctv
 ```
 
+Multi-arch images (`linux/amd64`, `linux/arm64`) are also published to the
+GitHub Container Registry by the `release` workflow:
+
+```bash
+docker run -d --name synctv -v /opt/synctv:/root/.synctv -p 8080:8080 ghcr.io/yuanshi76/synctv:main
+```
+
 ## Docker compose
 
 [docker-compose.yml](./script/docker-compose.yml)
