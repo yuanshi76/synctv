@@ -55,7 +55,7 @@ SyncTV's synchronized viewing feature ensures that everyone watching the video i
   - [x] Bilibili
 - [x] WebRTC online call
   - [x] Audio
-  - [ ] Video
+  - [x] Video
   - [ ] Screen
 
 ---
