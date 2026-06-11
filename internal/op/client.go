@@ -12,6 +12,11 @@ import (
 	pb "github.com/synctv-org/synctv/proto/message"
 )
 
+// maxMessageSize bounds a single inbound websocket message (bytes). Legitimate
+// messages (chat, WebRTC SDP/ICE signaling) are well under this; the limit
+// prevents an oversized frame from exhausting memory in readMessage's ReadAll.
+const maxMessageSize = 1 << 20 // 1 MiB
+
 type Client struct {
 	u         *User
 	r         *Room
@@ -26,6 +31,8 @@ type Client struct {
 }
 
 func newClient(user *User, room *Room, h *Hub, conn *websocket.Conn) *Client {
+	conn.SetReadLimit(maxMessageSize)
+
 	return &Client{
 		connID:  uuid.New().String(),
 		r:       room,

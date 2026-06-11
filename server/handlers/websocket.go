@@ -392,10 +392,11 @@ func handleChatMessage(cli *op.Client, message string) error {
 		return sendErrorMessage(cli, "message is empty")
 	}
 
-	sanitizedMessage := template.HTMLEscapeString(message)
-	if len(sanitizedMessage) > MaxChatMessageLength {
+	if len(message) > MaxChatMessageLength {
 		return sendErrorMessage(cli, "message too long")
 	}
+
+	sanitizedMessage := template.HTMLEscapeString(message)
 
 	err := cli.SendChatMessage(sanitizedMessage)
 	if err != nil && errors.Is(err, model.ErrNoPermission) {

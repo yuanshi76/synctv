@@ -305,26 +305,50 @@ func ParseURLIsLocalIP(u string) (bool, error) {
 	return IsLocalIP(url.Host), nil
 }
 
+// IsLocalIP reports whether address points to a local or otherwise
+// non-public destination. It guards against SSRF by treating loopback,
+// private (RFC1918/ULA), link-local (including the cloud metadata
+// 169.254.169.254 range), unspecified, and the host's own interface
+// addresses as local. All resolved IPs (IPv4 and IPv6) are checked, so a
+// hostname is considered local if any of its addresses is local.
 func IsLocalIP(address string) bool {
 	host, _, err := net.SplitHostPort(address)
 	if err != nil {
 		host = address
 	}
 
-	ipAddr, err := net.ResolveIPAddr("ip", host)
+	// Handle bracketed/raw IPv6 literals and plain IPs without a DNS lookup.
+	if ip := net.ParseIP(strings.Trim(host, "[]")); ip != nil {
+		return isLocalIPAddr(ip)
+	}
+
+	ips, err := net.LookupIP(host)
 	if err != nil {
 		return false
 	}
 
 	localIPs := getLocalIPs()
-
-	for _, localIP := range localIPs {
-		if ipAddr.IP.Equal(localIP) {
+	for _, ip := range ips {
+		if isLocalIPAddr(ip) {
 			return true
+		}
+
+		for _, localIP := range localIPs {
+			if ip.Equal(localIP) {
+				return true
+			}
 		}
 	}
 
 	return false
+}
+
+func isLocalIPAddr(ip net.IP) bool {
+	return ip.IsLoopback() ||
+		ip.IsPrivate() ||
+		ip.IsLinkLocalUnicast() ||
+		ip.IsLinkLocalMulticast() ||
+		ip.IsUnspecified()
 }
 
 func getLocalIPs() []net.IP {
@@ -336,7 +360,7 @@ func getLocalIPs() []net.IP {
 	}
 
 	for _, addr := range addrs {
-		if ipNet, ok := addr.(*net.IPNet); ok && ipNet.IP.To4() != nil {
+		if ipNet, ok := addr.(*net.IPNet); ok {
 			localIPs = append(localIPs, ipNet.IP)
 		}
 	}
